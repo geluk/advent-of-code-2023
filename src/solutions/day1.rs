@@ -8,24 +8,21 @@ impl Day for Day1 {
     const DAY_NO: usize = 1;
 
     fn solve_challenge_1(input: &Self::Input) -> u32 {
-        input.iter().map(|&l| calculate_value(l)).sum()
+        input.iter().map(|&l| calibrate(l)).sum()
     }
 
     fn solve_challenge_2(input: &Self::Input) -> u32 {
-        input.iter().map(|&l| calculate_value_advanced(l)).sum()
+        input.iter().map(|&l| calibrate_spelled_out(l)).sum()
     }
 }
 
-fn calculate_value(line: &str) -> u32 {
-    let mut character_iterator = line.chars().flat_map(|c| c.to_digit(10));
+fn calibrate(line: &str) -> u32 {
+    let digits = line.chars().flat_map(|c| c.to_digit(10));
 
-    let first = character_iterator.clone().next().unwrap();
-    let last = character_iterator.next_back().unwrap();
-
-    first * 10 + last
+    calculate_calibration(digits)
 }
 
-fn calculate_value_advanced(line: &str) -> u32 {
+fn calibrate_spelled_out(line: &str) -> u32 {
     let replacements = [
         ("one", 1),
         ("two", 2),
@@ -38,20 +35,24 @@ fn calculate_value_advanced(line: &str) -> u32 {
         ("nine", 9),
     ];
 
-    let mut values = Vec::new();
+    let mut digits = Vec::new();
 
     for idx in 0..line.len() {
         let slice = &line[idx..];
 
-        if let Some((_, r)) = replacements.iter().find(|(n, _)| slice.starts_with(n)) {
-            values.push(*r);
-        } else if let Some(x) = slice.chars().next().and_then(|c| c.to_digit(10)) {
-            values.push(x);
+        if let Some((_, rep)) = replacements.iter().find(|(n, _)| slice.starts_with(n)) {
+            digits.push(*rep);
+        } else if let Some(d) = slice.chars().next().and_then(|c| c.to_digit(10)) {
+            digits.push(d);
         }
     }
 
-    let first = values.first().unwrap();
-    let last = values.last().unwrap();
+    calculate_calibration(digits.into_iter())
+}
+
+fn calculate_calibration<I: DoubleEndedIterator<Item = u32> + Clone>(mut iter: I) -> u32 {
+    let first = iter.clone().next().unwrap();
+    let last = iter.next_back().unwrap();
 
     first * 10 + last
 }
