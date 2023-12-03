@@ -1,4 +1,8 @@
-const DAYS: [&str; 2] = [include_str!("day01.txt"), include_str!("day02.txt")];
+const DAYS: [&str; 3] = [
+    include_str!("day01.txt"),
+    include_str!("day02.txt"),
+    include_str!("day03.txt"),
+];
 
 pub fn load_day<I: DayInput>(day_no: usize) -> I {
     let day = DAYS[day_no - 1];
