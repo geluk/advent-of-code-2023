@@ -15,6 +15,7 @@ trait Day {
 fn main() {
     solve_day::<Day1>();
     solve_day::<Day2>();
+    solve_day::<Day3>();
 }
 
 fn solve_day<D: Day>() {
