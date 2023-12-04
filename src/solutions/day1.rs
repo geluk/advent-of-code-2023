@@ -1,3 +1,5 @@
+use arrayvec::ArrayVec;
+
 use crate::Day;
 
 pub struct Day1;
@@ -17,7 +19,7 @@ impl Day for Day1 {
 }
 
 fn calibrate(line: &str) -> u32 {
-    let digits = line.chars().flat_map(|c| c.to_digit(10));
+    let digits = line.chars().filter_map(|c| c.to_digit(10));
 
     calculate_calibration(digits)
 }
@@ -35,7 +37,7 @@ fn calibrate_spelled_out(line: &str) -> u32 {
         ("nine", 9),
     ];
 
-    let mut digits = Vec::new();
+    let mut digits: ArrayVec<u32, 16> = ArrayVec::new();
 
     for idx in 0..line.len() {
         let slice = &line[idx..];
@@ -51,8 +53,8 @@ fn calibrate_spelled_out(line: &str) -> u32 {
 }
 
 fn calculate_calibration<I: DoubleEndedIterator<Item = u32> + Clone>(mut iter: I) -> u32 {
-    let first = iter.clone().next().unwrap();
-    let last = iter.next_back().unwrap();
+    let first = iter.next().unwrap();
+    let last = iter.next_back().unwrap_or(first);
 
     first * 10 + last
 }
