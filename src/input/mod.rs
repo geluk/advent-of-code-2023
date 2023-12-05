@@ -1,8 +1,9 @@
-const DAYS: [&str; 4] = [
+const DAYS: [&str; 5] = [
     include_str!("day01.txt"),
     include_str!("day02.txt"),
     include_str!("day03.txt"),
     include_str!("day04.txt"),
+    include_str!("day05.txt"),
 ];
 
 pub fn load_day<I: DayInput>(day_no: usize) -> I {
