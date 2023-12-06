@@ -23,6 +23,7 @@ fn main() {
     solve_day::<Day3>();
     solve_day::<Day4>();
     solve_day::<Day5>();
+    solve_day::<Day6>();
 
     let elapsed = now.elapsed().as_micros() as f32 / 1000.0;
 
@@ -108,5 +109,10 @@ mod tests {
     #[test]
     pub fn test_day5() {
         verify_answers::<Day5>(510109797, 9622622);
+    }
+
+    #[test]
+    pub fn test_day6() {
+        verify_answers::<Day6>(2374848, 0);
     }
 }
