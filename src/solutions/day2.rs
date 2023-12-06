@@ -1,14 +1,12 @@
-use anyhow::Result;
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    character::complete::digit1,
-    combinator::{eof, map_res},
     multi::separated_list1,
-    sequence::{delimited, separated_pair, terminated},
+    sequence::{delimited, separated_pair},
+    IResult,
 };
 
-use crate::{input::DayInput, Day};
+use crate::{common, input::DayInput, Day};
 
 pub struct Day2;
 
@@ -82,15 +80,15 @@ impl Draw {
 
 impl DayInput for Game {
     fn load(input: &'static str) -> Self {
-        parse(input).unwrap()
+        common::parse(game, input)
     }
 }
 
-fn parse(i: &'static str) -> Result<Game> {
-    let (i, game_no) = delimited(tag("Game "), number, tag(": "))(i)?;
-    let (_, draws) = terminated(separated_list1(tag("; "), draw), eof)(i)?;
+fn game(i: &str) -> IResult<&str, Game> {
+    let (i, game_no) = delimited(tag("Game "), common::u32, tag(": "))(i)?;
+    let (i, draws) = separated_list1(tag("; "), draw)(i)?;
 
-    Ok(Game { game_no, draws })
+    Ok((i, Game { game_no, draws }))
 }
 
 fn draw(i: &str) -> nom::IResult<&str, Draw> {
@@ -118,12 +116,8 @@ fn draw(i: &str) -> nom::IResult<&str, Draw> {
 
 fn color(i: &str) -> nom::IResult<&str, (u32, &str)> {
     separated_pair(
-        number,
+        common::u32,
         tag(" "),
         alt((tag("red"), tag("green"), tag("blue"))),
     )(i)
-}
-
-fn number(i: &str) -> nom::IResult<&str, u32> {
-    map_res(digit1, |r: &str| r.parse())(i)
 }

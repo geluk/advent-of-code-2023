@@ -2,14 +2,13 @@ use std::cmp::Ordering;
 
 use nom::{
     bytes::complete::{tag, take_until1},
-    character::complete::{digit1, line_ending},
-    combinator::map_res,
+    character::complete::line_ending,
     multi::many1,
     sequence::{delimited, preceded, terminated},
     IResult,
 };
 
-use crate::{input::DayInput, Day};
+use crate::{common, input::DayInput, Day};
 
 pub struct Day5;
 
@@ -175,8 +174,7 @@ impl Range {
 
 impl DayInput for Almanac {
     fn load(input: &'static str) -> Self {
-        let (_, almanac) = almanac(input).unwrap();
-        almanac
+        common::parse(almanac, input)
     }
 }
 
@@ -195,27 +193,23 @@ fn almanac(i: &'static str) -> IResult<&str, Almanac> {
 
 fn range_map(i: &'static str) -> IResult<&str, RangeMap> {
     let (i, _) = delimited(eol, take_until1("\n"), eol)(i)?;
-    let (i, mut ranges) = many1(range)(i)?;
+    let (i, ranges) = many1(range)(i)?;
 
     Ok((i, RangeMap::new(ranges)))
 }
 
 fn range(i: &str) -> IResult<&str, Range> {
-    let (i, dest) = terminated(number, tag(" "))(i)?;
-    let (i, src) = terminated(number, tag(" "))(i)?;
-    let (i, count) = terminated(number, eol)(i)?;
+    let (i, dest) = terminated(common::u64, tag(" "))(i)?;
+    let (i, src) = terminated(common::u64, tag(" "))(i)?;
+    let (i, count) = terminated(common::u64, eol)(i)?;
 
     Ok((i, Range::new(src, dest, count)))
 }
 
 fn seed_list(i: &str) -> IResult<&str, Vec<u64>> {
-    delimited(tag("seeds:"), many1(preceded(tag(" "), number)), eol)(i)
+    delimited(tag("seeds:"), many1(preceded(tag(" "), common::u64)), eol)(i)
 }
 
 fn eol(i: &str) -> IResult<&str, &str> {
     line_ending(i)
-}
-
-fn number(i: &str) -> IResult<&str, u64> {
-    map_res(digit1, |r: &str| r.parse())(i)
 }

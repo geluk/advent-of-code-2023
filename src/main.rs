@@ -1,10 +1,11 @@
+mod common;
+mod input;
+mod solutions;
+
 use std::time::{Duration, Instant};
 
 use input::DayInput;
 use solutions::*;
-
-mod input;
-mod solutions;
 
 trait Day {
     type Input: DayInput;

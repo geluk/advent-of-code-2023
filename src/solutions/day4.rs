@@ -1,16 +1,13 @@
 use std::collections::HashSet;
 
-use anyhow::Result;
 use nom::{
     bytes::complete::tag,
-    character::complete::digit1,
-    combinator::{eof, map_res},
     multi::{fold_many1, many1},
-    sequence::{delimited, preceded, separated_pair, terminated},
+    sequence::{delimited, preceded, separated_pair},
     IResult,
 };
 
-use crate::{input::DayInput, Day};
+use crate::{common, input::DayInput, Day};
 
 pub struct Day4;
 
@@ -89,31 +86,28 @@ impl Card {
 
 impl DayInput for Card {
     fn load(input: &'static str) -> Self {
-        fn load_internal(i: &'static str) -> Result<Card> {
-            let (i, card_no) = delimited(tag("Card"), whitespace_number, tag(":"))(i)?;
-            let (_, (winning_numbers, have_numbers)) =
-                terminated(separated_pair(number_set, tag(" |"), number_set), eof)(i)?;
-
-            Ok(Card::new(card_no as usize, winning_numbers, have_numbers))
-        }
-
-        load_internal(input).unwrap()
+        common::parse(card, input)
     }
 }
 
-fn number_set(input: &str) -> IResult<&str, HashSet<u32>> {
+fn card(i: &str) -> IResult<&str, Card> {
+    let (i, card_no) = delimited(tag("Card"), whitespace_number, tag(":"))(i)?;
+    let (i, (winning_numbers, have_numbers)) =
+        separated_pair(number_set, tag(" |"), number_set)(i)?;
+
+    let card = Card::new(card_no as usize, winning_numbers, have_numbers);
+    Ok((i, card))
+}
+
+fn number_set(i: &str) -> IResult<&str, HashSet<u32>> {
     let add_number = |mut set: HashSet<u32>, num| {
         set.insert(num);
         set
     };
 
-    fold_many1(whitespace_number, HashSet::new, add_number)(input)
+    fold_many1(whitespace_number, HashSet::new, add_number)(i)
 }
 
-fn whitespace_number(input: &str) -> IResult<&str, u32> {
-    preceded(many1(tag(" ")), number)(input)
-}
-
-fn number(i: &str) -> nom::IResult<&str, u32> {
-    map_res(digit1, |r: &str| r.parse())(i)
+fn whitespace_number(i: &str) -> IResult<&str, u32> {
+    preceded(many1(tag(" ")), common::u32)(i)
 }

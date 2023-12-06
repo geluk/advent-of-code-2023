@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0"
 regex = "1.6"
 nom = "7.1"
 itertools = "0.12"
