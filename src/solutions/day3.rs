@@ -12,16 +12,15 @@ impl Day for Day3 {
 
     fn solve_challenge_1(input: &Self::Input) -> u32 {
         input
-            .find_numbers()
-            .into_iter()
+            .numbers
+            .iter()
             .filter(|n| n.is_adjacent_to_symbol(input))
             .map(|i| i.value)
             .sum()
     }
 
     fn solve_challenge_2(input: &Self::Input) -> u32 {
-        let numbers = input.find_numbers();
-        let number_lookup = build_number_lookup(&numbers);
+        let number_lookup = build_number_lookup(&input.numbers);
 
         input
             .find_gears()
@@ -33,22 +32,29 @@ impl Day for Day3 {
 }
 
 fn build_number_lookup(numbers: &[Number]) -> HashMap<Point, &Number> {
-    numbers
-        .iter()
-        .flat_map(|n| n.area().walk_lr_tb().map(move |p| (p, n)))
-        .collect()
+    let mut m = HashMap::with_capacity(4096);
+    m.extend(
+        numbers
+            .iter()
+            .flat_map(|n| n.area().walk_lr_tb().map(move |p| (p, n))),
+    );
+    m
 }
 
 pub struct Schematic {
     rows: Vec<Vec<Character>>,
+    numbers: Vec<Number>,
 }
 impl Schematic {
-    fn find_numbers(&self) -> Vec<Number> {
-        self.rows
-            .iter()
-            .enumerate()
-            .flat_map(|(y, row)| NumbersBuilder::build(row, y))
-            .collect()
+    fn new(rows: Vec<Vec<Character>>) -> Self {
+        let mut numbers = Vec::with_capacity(1536);
+        numbers.extend(
+            rows.iter()
+                .enumerate()
+                .flat_map(|(y, row)| NumbersBuilder::build(row, y)),
+        );
+
+        Self { rows, numbers }
     }
 
     fn find_gears(&self) -> impl Iterator<Item = Point> + '_ {
@@ -230,9 +236,7 @@ impl Point {
 
 impl DayInput for Schematic {
     fn load(input: &'static str) -> Self {
-        Schematic {
-            rows: Vec::load(input),
-        }
+        Schematic::new(Vec::load(input))
     }
 }
 
