@@ -1,6 +1,6 @@
 use nom::{
     bytes::complete::tag,
-    character::complete::{line_ending, multispace1},
+    character::complete::{digit1, line_ending, multispace1},
     multi::many1,
     sequence::{delimited, preceded},
     IResult,
@@ -16,25 +16,31 @@ impl Day for Day6 {
     const DAY_NO: usize = 6;
 
     fn solve_challenge_1(input: &Self::Input) -> u32 {
-        input.races.iter().map(Race::solve).product()
+        input.races_incorrect.iter().map(Race::solve).product()
     }
 
     fn solve_challenge_2(input: &Self::Input) -> u32 {
-        0
+        input.race.solve()
     }
 }
 
 pub struct Competition {
-    races: Vec<Race>,
+    // The competition, interpreted incorrectly, representing multiple races:
+    races_incorrect: Vec<Race>,
+    // The competition, interpreted correctly, with just the one race:
+    race: Race,
 }
 
 struct Race {
-    time: u32,
-    record: u32,
+    duration: u64,
+    record: u64,
 }
 impl Race {
-    fn new(time: u32, record: u32) -> Self {
-        Self { time, record }
+    fn new(time: u64, record: u64) -> Self {
+        Self {
+            duration: time,
+            record,
+        }
     }
 
     fn solve(&self) -> u32 {
@@ -53,16 +59,16 @@ impl Race {
         // Substituting our variables gives:
         // (-d ± √(d² - 4r)) / -2
 
-        let d = self.time as f32;
-        let r = self.record as f32;
+        let d = self.duration as f64;
+        let r = self.record as f64;
 
         let discriminant = (d.powi(2) - 4.0 * r).sqrt();
 
         let lower_bound = (-d + discriminant) / -2.0;
         let upper_bound = (-d - discriminant) / -2.0;
 
-        let solutions = (lower_bound.ceil() as u32)..(upper_bound.ceil() as u32);
-        solutions.len() as u32
+        let solution_count = upper_bound.ceil() - lower_bound.ceil();
+        solution_count as u32
     }
 }
 
@@ -73,6 +79,19 @@ impl DayInput for Competition {
 }
 
 fn competition(i: &str) -> IResult<&str, Competition> {
+    let (_, races) = races(i)?;
+    let (i, race) = race(i)?;
+
+    Ok((
+        i,
+        Competition {
+            race,
+            races_incorrect: races,
+        },
+    ))
+}
+
+fn races(i: &str) -> IResult<&str, Vec<Race>> {
     let (i, times) = number_list("Time:")(i)?;
     let (i, records) = number_list("Distance:")(i)?;
 
@@ -82,13 +101,33 @@ fn competition(i: &str) -> IResult<&str, Competition> {
         .map(|(t, r)| Race::new(t, r))
         .collect();
 
-    Ok((i, Competition { races }))
+    Ok((i, races))
 }
 
-fn number_list<'i>(label: &'static str) -> impl FnMut(&'i str) -> IResult<&'i str, Vec<u32>> {
+fn race(i: &str) -> IResult<&str, Race> {
+    let (i, time) = spaced_number("Time:")(i)?;
+    let (i, record) = spaced_number("Distance:")(i)?;
+
+    Ok((i, Race::new(time, record)))
+}
+
+fn number_list<'i>(label: &'static str) -> impl FnMut(&'i str) -> IResult<&'i str, Vec<u64>> {
     delimited(
         tag(label),
-        many1(preceded(multispace1, common::u32)),
+        many1(preceded(multispace1, common::u64)),
         line_ending,
     )
+}
+
+fn spaced_number<'i>(label: &'static str) -> impl FnMut(&'i str) -> IResult<&'i str, u64> {
+    move |i: &'i str| {
+        let (i, digits) = delimited(
+            tag(label),
+            many1(preceded(multispace1, digit1)),
+            line_ending,
+        )(i)?;
+
+        let num = digits.join("").parse().unwrap();
+        Ok((i, num))
+    }
 }

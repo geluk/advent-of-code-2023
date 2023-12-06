@@ -113,6 +113,6 @@ mod tests {
 
     #[test]
     pub fn test_day6() {
-        verify_answers::<Day6>(2374848, 0);
+        verify_answers::<Day6>(2374848, 39132886);
     }
 }
