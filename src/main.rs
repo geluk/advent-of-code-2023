@@ -24,6 +24,7 @@ fn main() {
     solve_day::<Day4>();
     solve_day::<Day5>();
     solve_day::<Day6>();
+    solve_day::<Day7>();
 
     let elapsed = now.elapsed().as_micros() as f32 / 1000.0;
 
