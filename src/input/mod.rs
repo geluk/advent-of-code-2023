@@ -26,6 +26,8 @@ impl DayInput for &str {
 
 impl<T: DayInput> DayInput for Vec<T> {
     fn load(input: &'static str) -> Self {
-        input.lines().map(T::load).collect()
+        let mut lines_vec = Vec::with_capacity(1000);
+        lines_vec.extend(input.lines().map(T::load));
+        lines_vec
     }
 }
