@@ -11,8 +11,8 @@ trait Day {
     type Input: DayInput;
     const DAY_NO: usize;
 
-    fn solve_challenge_1(input: &Self::Input) -> u32;
-    fn solve_challenge_2(input: &Self::Input) -> u32;
+    fn solve_challenge_1(input: &Self::Input) -> u64;
+    fn solve_challenge_2(input: &Self::Input) -> u64;
 }
 
 fn main() {
@@ -48,8 +48,8 @@ fn solve_day<D: Day>() {
 }
 
 struct Solution {
-    answer_1: u32,
-    answer_2: u32,
+    answer_1: u64,
+    answer_2: u64,
     t_1: Duration,
     t_2: Duration,
 }
@@ -81,7 +81,7 @@ mod tests {
 
     use super::*;
 
-    fn verify_answers<D: Day>(answer_1: u32, answer_2: u32) {
+    fn verify_answers<D: Day>(answer_1: u64, answer_2: u64) {
         let solution = calculate_solution::<D>();
 
         assert_eq!(answer_1, solution.answer_1);

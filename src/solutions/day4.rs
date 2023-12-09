@@ -10,26 +10,25 @@ use nom::{
 use crate::{common, input::DayInput, Day};
 
 pub struct Day4;
-
 impl Day for Day4 {
     type Input = Vec<Card>;
 
     const DAY_NO: usize = 4;
 
-    fn solve_challenge_1(input: &Self::Input) -> u32 {
-        Collection::new(input).score() as u32
+    fn solve_challenge_1(input: &Self::Input) -> u64 {
+        Collection::new(input).score()
     }
 
-    fn solve_challenge_2(input: &Self::Input) -> u32 {
+    fn solve_challenge_2(input: &Self::Input) -> u64 {
         let mut collection = Collection::new(input);
         collection.redeem_all();
-        collection.copies.iter().sum::<usize>() as u32
+        collection.copies.iter().sum()
     }
 }
 
 pub struct Collection<'c> {
     cards: &'c [Card],
-    copies: Vec<usize>,
+    copies: Vec<u64>,
 }
 impl<'c> Collection<'c> {
     fn new(cards: &'c [Card]) -> Self {
@@ -39,7 +38,7 @@ impl<'c> Collection<'c> {
         }
     }
 
-    fn score(&self) -> usize {
+    fn score(&self) -> u64 {
         self.cards
             .iter()
             .map(|c| c.score() * self.copies_of(c))
@@ -60,7 +59,7 @@ impl<'c> Collection<'c> {
         }
     }
 
-    fn copies_of(&self, card: &Card) -> usize {
+    fn copies_of(&self, card: &Card) -> u64 {
         self.copies[card.index]
     }
 }
@@ -79,7 +78,7 @@ impl Card {
         }
     }
 
-    pub fn score(&self) -> usize {
+    pub fn score(&self) -> u64 {
         1 << self.win_count >> 1
     }
 }

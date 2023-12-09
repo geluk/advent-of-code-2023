@@ -9,29 +9,26 @@ use nom::{
 use crate::{common, input::DayInput, Day};
 
 pub struct Day2;
-
 impl Day for Day2 {
     type Input = Vec<Game>;
 
     const DAY_NO: usize = 2;
 
-    fn solve_challenge_1(input: &Self::Input) -> u32 {
+    fn solve_challenge_1(input: &Self::Input) -> u64 {
         let max_draw = Draw {
             red: 12,
             green: 13,
             blue: 14,
         };
 
-        let sum = input
+        input
             .iter()
             .filter(|g| g.is_possible(&max_draw))
-            .map(|g| g.game_no)
-            .sum();
-
-        sum
+            .map(|g| g.game_no as u64)
+            .sum()
     }
 
-    fn solve_challenge_2(input: &Self::Input) -> u32 {
+    fn solve_challenge_2(input: &Self::Input) -> u64 {
         input.iter().map(|g| g.required_draw().power()).sum()
     }
 }
@@ -73,8 +70,8 @@ impl Draw {
         }
     }
 
-    fn power(&self) -> u32 {
-        self.red * self.green * self.blue
+    fn power(&self) -> u64 {
+        (self.red * self.green * self.blue) as u64
     }
 }
 

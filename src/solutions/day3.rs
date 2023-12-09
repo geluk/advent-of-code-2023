@@ -10,23 +10,23 @@ impl Day for Day3 {
 
     const DAY_NO: usize = 3;
 
-    fn solve_challenge_1(input: &Self::Input) -> u32 {
+    fn solve_challenge_1(input: &Self::Input) -> u64 {
         input
             .numbers
             .iter()
             .filter(|n| n.is_adjacent_to_symbol(input))
-            .map(|i| i.value)
+            .map(|i| i.value as u64)
             .sum()
     }
 
-    fn solve_challenge_2(input: &Self::Input) -> u32 {
+    fn solve_challenge_2(input: &Self::Input) -> u64 {
         let number_lookup = build_number_lookup(&input.numbers);
 
         input
             .find_gears()
             .map(|gear| input.numbers_around(gear, &number_lookup))
             .filter(|nums| nums.len() == 2)
-            .map(|nums| nums.iter().map(|n| n.value).product::<u32>())
+            .map(|nums| nums.iter().map(|n| n.value as u64).product::<u64>())
             .sum()
     }
 }

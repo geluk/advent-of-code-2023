@@ -17,25 +17,21 @@ impl Day for Day8 {
 
     const DAY_NO: usize = 8;
 
-    fn solve_challenge_1((instrs, map): &Self::Input) -> u32 {
+    fn solve_challenge_1((instrs, map): &Self::Input) -> u64 {
         let start = Label(['A', 'A', 'A']);
         let end = Label(['Z', 'Z', 'Z']);
         let instruction_cycle = instrs.iter().copied().cycle();
         Cursor::new(start, map, instruction_cycle).walk_to(|l| l == end)
     }
 
-    fn solve_challenge_2((instrs, map): &Self::Input) -> u32 {
-        let answer = map
-            .starting_points()
+    fn solve_challenge_2((instrs, map): &Self::Input) -> u64 {
+        map.starting_points()
             .map(|start| {
                 let instruction_cycle = instrs.iter().copied().cycle();
-                Cursor::new(start, map, instruction_cycle).walk_to(|l| l.ends_with('Z')) as u64
+                Cursor::new(start, map, instruction_cycle).walk_to(|l| l.ends_with('Z'))
             })
             .reduce(least_common_multiple)
-            .unwrap();
-
-        println!("The answer is {answer}");
-        0
+            .unwrap()
     }
 }
 
@@ -64,7 +60,7 @@ impl<'m, I: Iterator<Item = Instruction>> Cursor<'m, I> {
         }
     }
 
-    fn walk_to<P>(&mut self, end_predicate: P) -> u32
+    fn walk_to<P>(&mut self, end_predicate: P) -> u64
     where
         P: Fn(Label) -> bool,
     {

@@ -11,22 +11,20 @@ use nom::{
 use crate::{common, input::DayInput, Day};
 
 pub struct Day5;
-
 impl Day for Day5 {
     type Input = Almanac;
 
     const DAY_NO: usize = 5;
 
-    fn solve_challenge_1(input: &Self::Input) -> u32 {
+    fn solve_challenge_1(input: &Self::Input) -> u64 {
         input.find_min_location(|s| s.iter().map(|s| SeedCollection::from_start_count(*s, 1)))
-            as u32
     }
 
-    fn solve_challenge_2(input: &Self::Input) -> u32 {
+    fn solve_challenge_2(input: &Self::Input) -> u64 {
         input.find_min_location(|s| {
             s.chunks_exact(2)
                 .map(|c| SeedCollection::from_start_count(c[0], c[1]))
-        }) as u32
+        })
     }
 }
 

@@ -17,7 +17,7 @@ impl Day for Day7 {
 
     const DAY_NO: usize = 7;
 
-    fn solve_challenge_1(input: &Self::Input) -> u32 {
+    fn solve_challenge_1(input: &Self::Input) -> u64 {
         input
             .iter()
             .sorted_by_key(|h| (h.rank, h.cards))
@@ -27,7 +27,7 @@ impl Day for Day7 {
             .sum()
     }
 
-    fn solve_challenge_2(input: &Self::Input) -> u32 {
+    fn solve_challenge_2(input: &Self::Input) -> u64 {
         input
             .iter()
             .map(|h| (*h, h.as_wild_card().promote()))
@@ -39,12 +39,12 @@ impl Day for Day7 {
 }
 
 trait Score {
-    fn score(&self) -> u32;
+    fn score(&self) -> u64;
 }
 impl<T> Score for (usize, Hand<T>) {
-    fn score(&self) -> u32 {
+    fn score(&self) -> u64 {
         let (idx, card) = self;
-        let rank = (idx + 1) as u32;
+        let rank = (idx + 1) as u64;
         rank * card.bid
     }
 }
@@ -52,8 +52,8 @@ impl<T> Score for (usize, Hand<T>) {
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Hand<C> {
     cards: Cards<C>,
-    bid: u32,
-    rank: u32,
+    bid: u64,
+    rank: u64,
 }
 impl Hand<ClassicCard> {
     fn as_wild_card(&self) -> Hand<WildCard> {
@@ -98,7 +98,7 @@ impl Hand<WildCard> {
     }
 }
 impl<C: Eq + Ord + Copy> Hand<C> {
-    fn new(cards: Cards<C>, bid: u32) -> Hand<C> {
+    fn new(cards: Cards<C>, bid: u64) -> Hand<C> {
         Self {
             cards,
             bid,
@@ -106,7 +106,7 @@ impl<C: Eq + Ord + Copy> Hand<C> {
         }
     }
 
-    fn get_rank(cards: &Cards<C>) -> u32 {
+    fn get_rank(cards: &Cards<C>) -> u64 {
         let group_sizes: ArrayVec<_, 5> = Self::group_cards(cards.iter().copied())
             .map(|(count, _)| count)
             .collect();
@@ -172,7 +172,7 @@ impl DayInput for Hand<ClassicCard> {
 
 fn hand(i: &str) -> IResult<&str, Hand<ClassicCard>> {
     map(
-        pair(cards, preceded(tag(" "), common::u32)),
+        pair(cards, preceded(tag(" "), common::u64)),
         |(cards, bid)| Hand::new(cards, bid),
     )(i)
 }

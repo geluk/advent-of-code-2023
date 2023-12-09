@@ -9,17 +9,16 @@ use nom::{
 use crate::{common, input::DayInput, Day};
 
 pub struct Day6;
-
 impl Day for Day6 {
     type Input = Competition;
 
     const DAY_NO: usize = 6;
 
-    fn solve_challenge_1(input: &Self::Input) -> u32 {
+    fn solve_challenge_1(input: &Self::Input) -> u64 {
         input.races_incorrect.iter().map(Race::solve).product()
     }
 
-    fn solve_challenge_2(input: &Self::Input) -> u32 {
+    fn solve_challenge_2(input: &Self::Input) -> u64 {
         input.race.solve()
     }
 }
@@ -43,7 +42,7 @@ impl Race {
         }
     }
 
-    fn solve(&self) -> u32 {
+    fn solve(&self) -> u64 {
         // x = hold time
         // d = race duration
         // r = record distance
@@ -68,7 +67,7 @@ impl Race {
         let upper_bound = (-d - discriminant) / -2.0;
 
         let solution_count = upper_bound.ceil() - lower_bound.ceil();
-        solution_count as u32
+        solution_count as u64
     }
 }
 
