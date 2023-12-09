@@ -1,5 +1,3 @@
-use std::fmt::{self, Display, Formatter};
-
 use arrayvec::ArrayVec;
 use itertools::Itertools;
 use nom::{
@@ -15,7 +13,7 @@ use crate::{common, input::DayInput, Day};
 
 pub struct Day7;
 impl Day for Day7 {
-    type Input = Vec<Hand>;
+    type Input = Vec<Hand<ClassicCard>>;
 
     const DAY_NO: usize = 7;
 
@@ -23,62 +21,84 @@ impl Day for Day7 {
         input
             .iter()
             .sorted_by_key(|h| (h.rank, h.cards))
+            .copied()
             .enumerate()
-            .map(|(idx, c)| {
-                let rank = (idx + 1) as u32;
-                rank * c.bid
-            })
+            .map(|s| s.score())
             .sum()
     }
 
-    fn solve_challenge_2(_input: &Self::Input) -> u32 {
-        0
+    fn solve_challenge_2(input: &Self::Input) -> u32 {
+        input
+            .iter()
+            .map(|h| (*h, h.as_wild_card().promote()))
+            .sorted_by_key(|(orig, promoted)| (promoted.rank, orig.cards))
+            .enumerate()
+            .map(|(idx, (hand, _))| (idx, hand).score())
+            .sum()
     }
 }
 
-#[derive(Clone, Copy)]
-pub struct Hand {
-    cards: Cards,
+trait Score {
+    fn score(&self) -> u32;
+}
+impl<T> Score for (usize, Hand<T>) {
+    fn score(&self) -> u32 {
+        let (idx, card) = self;
+        let rank = (idx + 1) as u32;
+        rank * card.bid
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct Hand<C> {
+    cards: Cards<C>,
     bid: u32,
     rank: u32,
 }
-impl Display for Hand {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{} rank {}",
-            self.cards.map(|c| c.to_string()).join(""),
-            self.rank
-        )
+impl Hand<ClassicCard> {
+    fn as_wild_card(&self) -> Hand<WildCard> {
+        Hand {
+            cards: self.cards.map(|c| c.as_wild_card()),
+            bid: self.bid,
+            rank: self.rank,
+        }
     }
 }
+impl Hand<WildCard> {
+    fn promote(&self) -> Hand<WildCard> {
+        fn promote_jokers(cards: Cards<WildCard>) -> Cards<WildCard> {
+            let idx = cards.iter().find_position(|&&c| c == WildCard::Joker);
+            match idx {
+                Some((idx, _)) => {
+                    if let Some((_, target_card)) = Hand::group_cards(cards.iter().copied())
+                        .find(|(_, c)| *c != WildCard::Joker)
+                    {
+                        let mut new_cards = cards;
+                        new_cards[idx] = target_card;
 
-type Cards = [Card; 5];
+                        promote_jokers(new_cards)
+                    } else {
+                        // This can only happen if the hand is full of jokers.
+                        // Promote them all to aces.
+                        [WildCard::Ace; 5]
+                    }
+                }
+                None => cards,
+            }
+        }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-enum Card {
-    Num(u32),
-    Jack,
-    Queen,
-    King,
-    Ace,
-}
-impl Display for Card {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let display_char = match self {
-            Card::Num(10) => "T",
-            Card::Num(n) => return write!(f, "{}", n),
-            Card::Jack => "J",
-            Card::Queen => "Q",
-            Card::King => "K",
-            Card::Ace => "A",
-        };
-        write!(f, "{display_char}")
+        let new_cards = promote_jokers(self.cards);
+        let new_hand = Self::new(new_cards, self.bid);
+
+        if new_hand == *self {
+            *self
+        } else {
+            new_hand
+        }
     }
 }
-
-impl Hand {
-    fn new(cards: Cards, bid: u32) -> Hand {
+impl<C: Eq + Ord + Copy> Hand<C> {
+    fn new(cards: Cards<C>, bid: u32) -> Hand<C> {
         Self {
             cards,
             bid,
@@ -86,19 +106,12 @@ impl Hand {
         }
     }
 
-    fn get_rank(cards: &Cards) -> u32 {
-        let mut groups: ArrayVec<usize, 5> = cards
-            .iter()
-            .sorted()
-            .group_by(|&&c| c)
-            .into_iter()
-            .map(|(_, items)| items.count())
+    fn get_rank(cards: &Cards<C>) -> u32 {
+        let group_sizes: ArrayVec<_, 5> = Self::group_cards(cards.iter().copied())
+            .map(|(count, _)| count)
             .collect();
 
-        // Note the ordering, sort by group count descending.
-        groups.sort_by(|a, b| b.cmp(a));
-
-        match &groups[..] {
+        match &group_sizes[..] {
             [5] => 6,        // Five of a kind
             [4, ..] => 5,    // Four of a kind
             [3, 2] => 4,     // Full house
@@ -108,35 +121,76 @@ impl Hand {
             _ => 0,          // High card
         }
     }
+
+    fn group_cards<I: Iterator<Item = C>>(cards: I) -> impl Iterator<Item = (usize, C)> {
+        cards
+            .sorted()
+            .group_by(|&c| c)
+            .into_iter()
+            .map(|(c, items)| (items.count(), c))
+            // Note the ordering, sort by group count descending.
+            .sorted_by(|a, b| b.cmp(a))
+    }
 }
 
-impl DayInput for Hand {
+type Cards<C> = [C; 5];
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ClassicCard {
+    Num(u8),
+    Jack,
+    Queen,
+    King,
+    Ace,
+}
+impl ClassicCard {
+    fn as_wild_card(&self) -> WildCard {
+        match self {
+            ClassicCard::Num(n) => WildCard::Num(*n),
+            ClassicCard::Jack => WildCard::Joker,
+            ClassicCard::Queen => WildCard::Queen,
+            ClassicCard::King => WildCard::King,
+            ClassicCard::Ace => WildCard::Ace,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum WildCard {
+    Joker,
+    Num(u8),
+    Queen,
+    King,
+    Ace,
+}
+
+impl DayInput for Hand<ClassicCard> {
     fn load(input: &'static str) -> Self {
         common::parse(hand, input)
     }
 }
 
-fn hand(i: &str) -> IResult<&str, Hand> {
+fn hand(i: &str) -> IResult<&str, Hand<ClassicCard>> {
     map(
         pair(cards, preceded(tag(" "), common::u32)),
         |(cards, bid)| Hand::new(cards, bid),
     )(i)
 }
 
-fn cards(i: &str) -> IResult<&str, Cards> {
-    let mut cards = [Card::Num(0); 5];
+fn cards(i: &str) -> IResult<&str, Cards<ClassicCard>> {
+    let mut cards = [ClassicCard::Num(0); 5];
     let (i, ()) = fill(card, &mut cards)(i)?;
     Ok((i, cards))
 }
 
-fn card(i: &str) -> IResult<&str, Card> {
+fn card(i: &str) -> IResult<&str, ClassicCard> {
     map_opt(anychar, |c| match c {
-        'A' => Some(Card::Ace),
-        'K' => Some(Card::King),
-        'Q' => Some(Card::Queen),
-        'J' => Some(Card::Jack),
-        'T' => Some(Card::Num(10)),
-        '0'..='9' => Some(Card::Num(c.to_digit(10)?)),
+        'A' => Some(ClassicCard::Ace),
+        'K' => Some(ClassicCard::King),
+        'Q' => Some(ClassicCard::Queen),
+        'J' => Some(ClassicCard::Jack),
+        'T' => Some(ClassicCard::Num(10)),
+        '0'..='9' => Some(ClassicCard::Num(c.to_digit(10)? as u8)),
         _ => None,
     })(i)
 }
