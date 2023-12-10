@@ -2,8 +2,8 @@ use arrayvec::ArrayVec;
 
 use crate::Day;
 
-pub struct Day1;
-impl Day for Day1 {
+pub struct Day01;
+impl Day for Day01 {
     type Input = Vec<&'static str>;
 
     const DAY_NO: usize = 1;

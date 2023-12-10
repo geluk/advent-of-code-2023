@@ -10,8 +10,8 @@ use nom::{
 
 use crate::{common, input::DayInput, Day};
 
-pub struct Day5;
-impl Day for Day5 {
+pub struct Day05;
+impl Day for Day05 {
     type Input = Almanac;
 
     const DAY_NO: usize = 5;

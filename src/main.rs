@@ -18,15 +18,15 @@ trait Day {
 fn main() {
     let now = Instant::now();
 
-    solve_day::<Day1>();
-    solve_day::<Day2>();
-    solve_day::<Day3>();
-    solve_day::<Day4>();
-    solve_day::<Day5>();
-    solve_day::<Day6>();
-    solve_day::<Day7>();
-    solve_day::<Day8>();
-    solve_day::<Day9>();
+    solve_day::<Day01>();
+    solve_day::<Day02>();
+    solve_day::<Day03>();
+    solve_day::<Day04>();
+    solve_day::<Day05>();
+    solve_day::<Day06>();
+    solve_day::<Day07>();
+    solve_day::<Day08>();
+    solve_day::<Day09>();
 
     let elapsed = now.elapsed().as_micros() as f32 / 1000.0;
 
@@ -91,31 +91,31 @@ mod tests {
 
     #[test]
     pub fn test_day1() {
-        verify_answers::<Day1>(57346, 57345);
+        verify_answers::<Day01>(57346, 57345);
     }
 
     #[test]
     pub fn test_day2() {
-        verify_answers::<Day2>(2317, 74804);
+        verify_answers::<Day02>(2317, 74804);
     }
 
     #[test]
     pub fn test_day3() {
-        verify_answers::<Day3>(535078, 75312571);
+        verify_answers::<Day03>(535078, 75312571);
     }
 
     #[test]
     pub fn test_day4() {
-        verify_answers::<Day4>(23235, 5920640);
+        verify_answers::<Day04>(23235, 5920640);
     }
 
     #[test]
     pub fn test_day5() {
-        verify_answers::<Day5>(510109797, 9622622);
+        verify_answers::<Day05>(510109797, 9622622);
     }
 
     #[test]
     pub fn test_day6() {
-        verify_answers::<Day6>(2374848, 39132886);
+        verify_answers::<Day06>(2374848, 39132886);
     }
 }

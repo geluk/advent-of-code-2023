@@ -4,8 +4,8 @@ use itertools::Itertools;
 
 use crate::{input::DayInput, Day};
 
-pub struct Day3;
-impl Day for Day3 {
+pub struct Day03;
+impl Day for Day03 {
     type Input = Schematic;
 
     const DAY_NO: usize = 3;

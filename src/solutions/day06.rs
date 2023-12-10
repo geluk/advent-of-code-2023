@@ -8,8 +8,8 @@ use nom::{
 
 use crate::{common, input::DayInput, Day};
 
-pub struct Day6;
-impl Day for Day6 {
+pub struct Day06;
+impl Day for Day06 {
     type Input = Competition;
 
     const DAY_NO: usize = 6;

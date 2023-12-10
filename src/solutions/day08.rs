@@ -11,8 +11,8 @@ use nom::{
 
 use crate::{common, input::DayInput, Day};
 
-pub struct Day8;
-impl Day for Day8 {
+pub struct Day08;
+impl Day for Day08 {
     type Input = (Vec<Instruction>, Map);
 
     const DAY_NO: usize = 8;

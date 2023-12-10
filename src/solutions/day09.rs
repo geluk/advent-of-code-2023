@@ -2,8 +2,8 @@ use nom::{bytes::complete::tag, combinator::map, multi::separated_list1, IResult
 
 use crate::{common, input::DayInput, Day};
 
-pub struct Day9;
-impl Day for Day9 {
+pub struct Day09;
+impl Day for Day09 {
     type Input = Vec<Sequence>;
 
     const DAY_NO: usize = 9;

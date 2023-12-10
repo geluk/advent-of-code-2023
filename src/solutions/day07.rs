@@ -11,8 +11,8 @@ use nom::{
 
 use crate::{common, input::DayInput, Day};
 
-pub struct Day7;
-impl Day for Day7 {
+pub struct Day07;
+impl Day for Day07 {
     type Input = Vec<Hand<ClassicCard>>;
 
     const DAY_NO: usize = 7;

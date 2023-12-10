@@ -9,8 +9,8 @@ use nom::{
 
 use crate::{common, input::DayInput, Day};
 
-pub struct Day4;
-impl Day for Day4 {
+pub struct Day04;
+impl Day for Day04 {
     type Input = Vec<Card>;
 
     const DAY_NO: usize = 4;
