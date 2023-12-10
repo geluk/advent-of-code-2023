@@ -1,5 +1,6 @@
 use nom::{combinator::eof, sequence::terminated, IResult};
 
+pub use nom::character::complete::i64;
 pub use nom::character::complete::u32;
 pub use nom::character::complete::u64;
 
