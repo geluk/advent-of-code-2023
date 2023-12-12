@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use nom::{
     bytes::complete::tag,
     character::{complete::anychar, streaming::line_ending},
@@ -8,6 +6,7 @@ use nom::{
     sequence::{delimited, pair, terminated, tuple},
     IResult,
 };
+use rustc_hash::FxHashMap;
 
 use crate::{common, input::DayInput, Day};
 
@@ -81,7 +80,7 @@ impl<'m, I: Iterator<Item = Instruction>> Cursor<'m, I> {
 }
 
 pub struct Map {
-    connections: BTreeMap<Label, Junction>,
+    connections: FxHashMap<Label, Junction>,
 }
 impl Map {
     fn junction(&self, start: &Label) -> &Junction {
@@ -96,7 +95,7 @@ impl Map {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Label([char; 3]);
 impl Label {
     fn ends_with(&self, char: char) -> bool {
@@ -152,7 +151,7 @@ fn junctions(i: &str) -> IResult<&str, Map> {
             terminated(junction, line_ending),
         )),
         |t: Vec<(Label, Junction)>| {
-            let mut connections = BTreeMap::new();
+            let mut connections = FxHashMap::default();
             connections.extend(t);
             Map { connections }
         },

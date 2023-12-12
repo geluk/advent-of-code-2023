@@ -1,11 +1,11 @@
-use std::collections::HashSet;
-
 use nom::{
     bytes::complete::tag,
+    character::complete::{line_ending, multispace1},
     multi::{fold_many1, many1},
-    sequence::{delimited, preceded, separated_pair},
+    sequence::{delimited, preceded, separated_pair, terminated},
     IResult,
 };
+use rustc_hash::FxHashSet;
 
 use crate::{common, input::DayInput, Day};
 
@@ -69,8 +69,12 @@ pub struct Card {
     win_count: usize,
 }
 impl Card {
-    pub fn new(card_no: usize, winning_numbers: HashSet<u32>, have_numbers: HashSet<u32>) -> Self {
-        let win_count = winning_numbers.intersection(&have_numbers).count();
+    pub fn new(
+        card_no: usize,
+        winning_numbers: &FxHashSet<u32>,
+        have_numbers: &FxHashSet<u32>,
+    ) -> Self {
+        let win_count = winning_numbers.intersection(have_numbers).count();
 
         Self {
             index: card_no - 1,
@@ -83,30 +87,50 @@ impl Card {
     }
 }
 
-impl DayInput for Card {
+impl DayInput for Vec<Card> {
     fn load(input: &'static str) -> Self {
-        common::parse(card, input)
+        common::parse(cards, input)
     }
 }
 
-fn card(i: &str) -> IResult<&str, Card> {
-    let (i, card_no) = delimited(tag("Card"), whitespace_number, tag(":"))(i)?;
-    let (i, (winning_numbers, have_numbers)) =
-        separated_pair(number_set, tag(" |"), number_set)(i)?;
+fn cards(i: &str) -> IResult<&str, Vec<Card>> {
+    let mut winning_buffer = FxHashSet::with_capacity_and_hasher(10, Default::default());
+    let mut have_buffer = FxHashSet::with_capacity_and_hasher(25, Default::default());
 
-    let card = Card::new(card_no as usize, winning_numbers, have_numbers);
+    many1(move |i| card(i, &mut winning_buffer, &mut have_buffer))(i)
+}
+
+fn card<'i, 'b>(
+    i: &'i str,
+    winning: &'b mut FxHashSet<u32>,
+    have: &'b mut FxHashSet<u32>,
+) -> IResult<&'i str, Card> {
+    let (i, card_no) = delimited(tag("Card"), whitespace_number, tag(":"))(i)?;
+    let (i, _) = terminated(
+        separated_pair(
+            |i| number_set(i, winning),
+            tag(" |"),
+            |i| number_set(i, have),
+        ),
+        line_ending,
+    )(i)?;
+
+    let card = Card::new(card_no as usize, winning, have);
     Ok((i, card))
 }
 
-fn number_set(i: &str) -> IResult<&str, HashSet<u32>> {
-    let add_number = |mut set: HashSet<u32>, num| {
-        set.insert(num);
-        set
-    };
+fn number_set<'i>(i: &'i str, number_buffer: &mut FxHashSet<u32>) -> IResult<&'i str, ()> {
+    number_buffer.clear();
 
-    fold_many1(whitespace_number, HashSet::new, add_number)(i)
+    fold_many1(
+        whitespace_number,
+        || (),
+        |(), n| {
+            number_buffer.insert(n);
+        },
+    )(i)
 }
 
 fn whitespace_number(i: &str) -> IResult<&str, u32> {
-    preceded(many1(tag(" ")), common::u32)(i)
+    preceded(multispace1, common::u32)(i)
 }

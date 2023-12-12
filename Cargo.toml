@@ -7,7 +7,8 @@ edition = "2021"
 regex = "1.6"
 nom = "7.1"
 itertools = "0.12"
-arrayvec = "0.7.4"
+arrayvec = "0.7"
+rustc-hash = "1.1"
 
 [profile.release]
 debug = true

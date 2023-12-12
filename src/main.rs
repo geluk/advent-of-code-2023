@@ -37,6 +37,7 @@ fn main() {
 fn solve_day<D: Day>() {
     let s = calculate_solution::<D>();
     println!("Day {}:", D::DAY_NO);
+    println!(" - parsed input (in {}µs)", s.t_input.as_micros());
     println!(
         " - first answer: {} (in {}µs)",
         s.answer_1,
@@ -52,18 +53,20 @@ fn solve_day<D: Day>() {
 struct Solution {
     answer_1: u64,
     answer_2: u64,
+    t_input: Duration,
     t_1: Duration,
     t_2: Duration,
 }
 
 fn calculate_solution<D: Day>() -> Solution {
-    let (input, _) = measure(|| input::load_day(D::DAY_NO));
+    let (input, t_input) = measure(|| input::load_day(D::DAY_NO));
     let (answer_1, t_1) = measure(|| D::solve_challenge_1(&input));
     let (answer_2, t_2) = measure(|| D::solve_challenge_2(&input));
 
     Solution {
         answer_1,
         answer_2,
+        t_input,
         t_1,
         t_2,
     }
@@ -88,6 +91,22 @@ mod tests {
 
         assert_eq!(answer_1, solution.answer_1);
         assert_eq!(answer_2, solution.answer_2);
+    }
+
+    #[test]
+    fn benchmark_all() {
+        for _ in 0..500 {
+            calculate_solution::<Day01>();
+            calculate_solution::<Day02>();
+            calculate_solution::<Day03>();
+            calculate_solution::<Day04>();
+            calculate_solution::<Day05>();
+            calculate_solution::<Day06>();
+            calculate_solution::<Day07>();
+            calculate_solution::<Day08>();
+            calculate_solution::<Day09>();
+            calculate_solution::<Day10>();
+        }
     }
 
     #[test]
