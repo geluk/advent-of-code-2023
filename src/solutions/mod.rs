@@ -8,6 +8,8 @@ pub use day07::Day07;
 pub use day08::Day08;
 pub use day09::Day09;
 pub use day10::Day10;
+pub use day11::Day11;
+pub use day12::Day12;
 
 mod day01;
 mod day02;
@@ -19,3 +21,5 @@ mod day07;
 mod day08;
 mod day09;
 mod day10;
+mod day11;
+mod day12;
